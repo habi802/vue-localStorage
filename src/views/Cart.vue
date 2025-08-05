@@ -42,17 +42,40 @@
       return;
     }
     
-    const res = await removeItem(cartId);
-    if (res === undefined || res.status !== 200) {
-      return;
-    }
+    if (!accountStore.state.loggedIn) {
+      // 비회원일 경우 state.items에서 삭제된 cartId를 찾은 뒤,
+      // 그 cartId를 가진 item을 state.items에서 삭제하고,
+      // item이 삭제된 state.items를 localStorage의 'myCart' 에 넣음
+      try {
+        const deleteIdx = state.items.findIndex(item => item.id === cartId);
+        if (deleteIdx > -1) {
+          state.items.splice(deleteIdx, 1);
+          calculateTotal();
+        }
 
-    //load();
-    if (res.data === 1) {
-      const deleteIdx = state.items.findIndex(item => item.id === cartId);
-      if (deleteIdx > -1) {
-        state.items.splice(deleteIdx, 1);
-        calculateTotal();
+        localStorage.setItem('myCart', JSON.stringify({
+          items: state.items
+        }));
+
+        //console.log(localStorage.getItem('myCart'));
+      } catch (error) {
+        console.log(error.message);
+        alert('장바구니 식제에 실패하였습니다.');
+      }
+    } else {
+      // 회원일 경우 axios 통신하여 장바구니 삭제
+      const res = await removeItem(cartId);
+      if (res === undefined || res.status !== 200) {
+        return;
+      }
+
+      //load();
+      if (res.data === 1) {
+        const deleteIdx = state.items.findIndex(item => item.id === cartId);
+        if (deleteIdx > -1) {
+          state.items.splice(deleteIdx, 1);
+          calculateTotal();
+        }
       }
     }
   };

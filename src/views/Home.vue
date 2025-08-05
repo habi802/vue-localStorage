@@ -67,6 +67,7 @@
           items: cartItems
         });
         localStorage.setItem('myCart', jsonCartItems);
+        //console.log(localStorage.getItem('myCart'));
         
         // 성공 시 장바구니 이동 가능
         if (confirm('장바구니에 상품을 담았습니다. 장바구니로 이동하시겠습니까?')) {
