@@ -1,6 +1,11 @@
 <script setup>
-  import { getItems, removeItem, removeCart } from '@/services/cartService';
   import { onMounted, reactive, ref } from 'vue';
+
+  import { getItems, removeItem, removeCart } from '@/services/cartService';
+
+  import { useAccountStore } from '@/stores/account';
+
+  const accountStore = useAccountStore();
 
   const state = reactive({
     items: []
@@ -10,13 +15,24 @@
 
   // 장바구니 상품 조회
   const load = async () => {
-    const res = await getItems();
+    if (!accountStore.state.loggedIn) {
+      // 비회원일 경우 localStorage로 장바구니 조회
+      const myCart = localStorage.getItem('myCart');
 
-    if (res.status !== 200) {
-      return;
+      if (myCart !== undefined && myCart !== null) {
+        state.items = JSON.parse(myCart).items;
+      }
+    } else {
+      // 회원일 경우 DB로 장바구니 조회
+      const res = await getItems();
+
+      if (res.status !== 200) {
+        return;
+      }
+
+      state.items = res.data;
     }
 
-    state.items = res.data;
     calculateTotal();
   };
 
@@ -41,7 +57,7 @@
     }
   };
 
-  // 장바구니 총 금액
+  // 장바구니 총 금액 계산하는 함수
   const calculateTotal = () => {
     total.value = 0;
 

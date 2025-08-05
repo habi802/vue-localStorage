@@ -1,5 +1,8 @@
 <script setup>
   import { onMounted, reactive } from 'vue';
+  import { useRouter } from 'vue-router';
+
+  const router = useRouter();
 
   import Card from '@/components/Card.vue';
 
