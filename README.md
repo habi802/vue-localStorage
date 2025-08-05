@@ -1,17 +1,14 @@
-# vue-gallery-localstorage
+#### 기존의 갤러리에서 비회원도 장바구니 쓸 수 있게 하는 코드
+##### 수정된 파일
+- Home.vue, Cart.vue 에 비회원 관련하여 코드 추가됨.
+- Card.vue 에 있던 put 함수가 삭제되고, Home.vue 에 putItem 가 추가됨.
 
-This template should help get you started developing with Vue 3 in Vite.
+##### 비회원 주문은 좀 더 해보겠음.
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 내 로컬에서 보고 싶다면?
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
+- git clone 어쩌구를 한 뒤
 ```sh
 npm install
 ```
