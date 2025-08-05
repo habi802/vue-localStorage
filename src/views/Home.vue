@@ -79,7 +79,7 @@
       }
     } else {
       // 회원일 경우 장바구니 DB에 저장
-      const res = await addItem(selectedItem.Id);
+      const res = await addItem(selectedItem.id);
 
       if (res === undefined) {
         alert('서버에 문제가 있습니다.');
