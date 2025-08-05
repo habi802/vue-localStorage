@@ -1,6 +1,9 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import { useAccountStore } from '@/stores/account';
 import { logout } from '@/services/accountService';
+
+const router = useRouter();
 
 const account = useAccountStore();
 
@@ -15,8 +18,8 @@ const logoutAccount = async () => {
     return;
   }
 
-  alert('로그아웃 되었슴당.');
   account.setLoggedIn(false);
+  router.push({ path: '/' });
 }
 </script>
 
@@ -36,6 +39,8 @@ const logoutAccount = async () => {
           <template v-else>
             <router-link to="/login">로그인</router-link>
             <router-link to="/join">회원가입</router-link>
+            <router-link to="/orders">주문 내역</router-link>
+            <router-link to="/cart">장바구니</router-link>
           </template>
         </div>
       </div>
