@@ -69,15 +69,21 @@
     total.value = total.value.toLocaleString();
   };
 
-  // 장바구니 비우기
+  // 장바구니 전체 삭제
   const clear = async () => {
     if (!confirm('장바구니를 비우시겠습니까?')) {
       return;
     }
 
-    const res = await removeCart();
-    if (res === undefined || res.status !== 200) {
-      return;
+    if (!accountStore.state.loggedIn) {
+      // 비회원일 경우 localStorage의 'myCart' 삭제
+      localStorage.removeItem('myCart');
+    } else {
+      // 회원일 경우 axios 통신하여 장바구니 전체 삭제
+      const res = await removeCart();
+      if (res === undefined || res.status !== 200) {
+        return;
+      }
     }
 
     state.items = [];

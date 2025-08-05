@@ -57,11 +57,12 @@
       }
 
       try {
-        // cartItems에 item을 넣은 뒤,
+        // cartItems에 item을 넣고 id 순으로 정렬한 뒤,
         // items라는 속성을 가진 객체의 속성값에 넣은 후,
         // 그 객체를 JSON 문자열로 변환하여
         // localStorage의 'myCart'에 넣음
         cartItems.push(selectedItem);
+        cartItems.sort((a, b) => a.id - b.id);
         const jsonCartItems = JSON.stringify({
           items: cartItems
         });
