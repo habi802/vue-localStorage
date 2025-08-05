@@ -7,7 +7,7 @@
   import { useAccountStore } from './stores/account';
 
   const route = useRoute();
-  const account = useAccountStore();
+  const accountStore = useAccountStore();
 
   // 로그인 여부 확인
   const checkAccount = async () => {
@@ -15,12 +15,12 @@
     const res = await check();
     console.log(res);
     if (res === undefined || res.status !== 200) {
-      account.setChecked(false);
+      accountStore.setChecked(false);
       return;
     }
 
-    account.setChecked(true);
-    account.setLoggedIn(res.data > 0);
+    accountStore.setChecked(true);
+    accountStore.setLoggedIn(res.data > 0);
   }
 
   onMounted(() => {
@@ -33,7 +33,7 @@
 </script>
 
 <template>
-  <template v-if="account.state.checked">
+  <template v-if="accountStore.state.checked">
     <Header />
     <router-view></router-view>
     <Footer />
