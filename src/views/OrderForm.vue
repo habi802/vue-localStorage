@@ -1,14 +1,20 @@
 <script setup>
   import { computed, onMounted, reactive } from 'vue';
   import { useRouter } from 'vue-router';
+
+  const router = useRouter();
+
   import { getItems } from '@/services/cartService';
   import { addOrder } from '@/services/orderService';
 
-  const router = useRouter();
+  import { useAccountStore } from '@/stores/account';
+
+  const accountStore = useAccountStore();
 
   const state = reactive({
     items: [],
     form: {
+      guestId: '', // 비회원용 아이디
       name: '',
       address: '',
       payment: 'card',
@@ -18,13 +24,23 @@
   });
 
   onMounted(async () => {
-    const res = await getItems();
+    if (!accountStore.state.loggedIn) {
+      // 비회원일 경우 localStorage로 장바구니 조회
+      const myCart = localStorage.getItem('myCart');
 
-    if (res === undefined || res.status !== 200) {
-      return;
+      if (myCart !== undefined && myCart !== null) {
+        state.items = JSON.parse(myCart).items;
+      }
+    } else {
+      // 회원일 경우 DB로 장바구니 조회
+      const res = await getItems();
+
+      if (res === undefined || res.status !== 200) {
+        return;
+      }
+
+      state.items = res.data;
     }
-
-    state.items = res.data;
   });
 
   const submit = async () => {
@@ -32,8 +48,36 @@
       // 결제 수단이 카드가 아니라면 카드 번호를 지운다.
       state.form.cardNumber = '';
     }
+
+    if (!accountStore.state.loggedIn) {
+      // 비회원일 경우 uuid를 생성하여 주문 등록
+      // 기존의 orders 테이블에 guest_id 컬럼을 추가하여,
+      // 그 컬럼에 생성한 uuid를 저장해야 한다.
+      // 그런데 이미 주문한 적이 있는 비회원이 다시 주문을 할려고 한다면,
+      // 이전과 같은 uuid가 guest_id 로 등록되어야 하므로
+      // 새로운 uuid를 생성하고 localStorage의 'myUuid' 에 저장한 뒤,
+      // localStorage의 'myUuid' 가 있다면 이것을 guest_id 로 한다.
+      let myUuid = localStorage.getItem('myUuid');
+      if (myUuid === undefined || myUuid === null) {
+        myUuid = crypto.randomUUID();
+        localStorage.setItem('myUuid', myUuid);
+      }
+      state.form.guestId = myUuid;
+
+      // 비회원일 때 localStorage의 'myCart' 에 담긴 객체에서
+      // 기존의 주문 등록 시 보내야 할 데이터의 속성명과 다른 속명이 있기 때문에,
+      // (itemId가 있어야 하는데 비회원일 경우에는 없음)
+      // 그 속성명을 보내야 할 데이터의 속성명으로 바꿈
+      const newItems = state.items.map(({ id, ...rest }) => ({
+        itemId: id,
+        ...rest
+      }));
+      state.items = newItems;
+    }
     
     state.form.itemIds = state.items.map(item => item.itemId);
+
+    // axios 통신하여 주문 등록
     const res = await addOrder(state.form);
     if (res === undefined || res.status !== 200) {
       alert('에러 발생');
@@ -44,6 +88,12 @@
     if (state.form.payment === 'bank') {
       const price = computedTotalPrice.value.toLocaleString();
       message.push(`한국은행 123-456-77777 계좌로 ${price}원을 입금해주시길 바랍니다.`);
+    }
+
+    if (!accountStore.state.loggedIn) {
+      // 비회원일 경우 DB의 장바구니 삭제를 할 수 없으므로
+      // localStorage의 'myCart' 를 삭제
+      localStorage.removeItem('myCart');
     }
 
     alert(message.join('\n'));
